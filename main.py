@@ -15,10 +15,39 @@
 # limitations under the License.
 #
 import webapp2
+import cgi
+import jinja2
+import os
+from google.appengine.ext import db
 
-class MainHandler(webapp2.RequestHandler):
+template_dir = os.path.join(os.path.dirname(__file__), "templates")
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
+
+#create the database of blog posts
+class BlogPost(db.Model):
+    title = db.StringProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+
+#create base handler others will inherit from
+class Handler(webapp2.RequestHandler):
+
+    #creates generic error message all handlers can use
+    def renderError(self, error_code):
+        self.error(error_code)
+        self.response.write("Oops! Something went wrong.")
+
+#creates main page
+class Index(Handler):
+
     def get(self):
-        self.response.write('Hello world!')
+        pass
+        #unwatched_movies = db.GqlQuery("SELECT * FROM Movie where watched = False")
+        #t = jinja_env.get_template("frontpage.html")
+        #content = t.render(
+        #                movies = unwatched_movies,
+        #                error = self.request.get("error"))
+        #self.response.write(content)
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
