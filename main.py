@@ -48,7 +48,22 @@ class Index(Handler):
         #                error = self.request.get("error"))
         #self.response.write(content)
 
+    def post(self):
+        pass
+
+class NewPostHandler(Handler):
+    def get (self):
+        pass
+
+    def post (self):
+        pass
+
+class ViewPostHandler(Handler):
+    def get(self, id):
+        pass
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', Index)
+    ('/newpost', NewPostHandler)
+    ('/blog/<id:\d+>', ViewPostHandler)
 ], debug=True)
