@@ -41,15 +41,14 @@ class Index(Handler):
 
     def get(self):
         pass
-        #unwatched_movies = db.GqlQuery("SELECT * FROM Movie where watched = False")
-        #t = jinja_env.get_template("frontpage.html")
-        #content = t.render(
-        #                movies = unwatched_movies,
-        #                error = self.request.get("error"))
-        #self.response.write(content)
+        #check syntax on this
+        last_five = db.GqlQuery("SELECT * FROM BlogPost ORDER created DESC LIMIT 5)
 
-    def post(self):
-        pass
+        t = jinja_env.get_template("index.html")
+        content = t.render(
+                        movies = unwatched_movies,
+                        error = self.request.get("error"))
+        self.response.write(content)
 
 class NewPostHandler(Handler):
     def get (self):
