@@ -14,10 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import webapp2
-import cgi
-import jinja2
-import os
+import webapp2, cgi, jinja2, os
 from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -26,6 +23,7 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
 #create the database of blog posts
 class BlogPost(db.Model):
     title = db.StringProperty(required = True)
+    body = db.StringProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
 
 #create base handler others will inherit from
@@ -40,29 +38,40 @@ class Handler(webapp2.RequestHandler):
 class Index(Handler):
 
     def get(self):
-        pass
-        #check syntax on this
-        last_five = db.GqlQuery("SELECT * FROM BlogPost ORDER created DESC LIMIT 5)
+        query = BlogPost.all().order("-created")
+        last_five = query.fetch(limit = 5)
 
         t = jinja_env.get_template("index.html")
-        content = t.render(
-                        movies = unwatched_movies,
-                        error = self.request.get("error"))
+        content = t.render(recent = last_five)
         self.response.write(content)
 
 class NewPostHandler(Handler):
     def get (self):
-        pass
+        t = jinja_env.get_template("newpost.html")
+        content = t.render()
+        self.response.write(content)
 
     def post (self):
-        pass
+        user_title = self.request.get("blogname")
+        user_body = self.request.get("blogtext")
 
-class ViewPostHandler(Handler):
+        #needs both title and body, else regenerate form with error message
+        #if not user_name and user_body:
+        #    error = "You need to add some content"
+        entry = BlogPost(title = user_title, body = user_body)
+        entry.put()
+        id = entry.key().id()
+        self.redirect('/blog/%s' %id)
+
+class ViewPostHandler(webapp2.RequestHandler):
     def get(self, id):
-        pass
+        post= BlogPost.get_by_id(int(id))
+        t = jinja_env.get_template("blogpost.html")
+        content = t.render(post=post)
+        self.response.write(content)
 
 app = webapp2.WSGIApplication([
-    ('/', Index)
-    ('/newpost', NewPostHandler)
-    ('/blog/<id:\d+>', ViewPostHandler)
+    ('/', Index),
+    ('/newpost', NewPostHandler),
+    webapp2.Route('/blog/<id:\d+>', ViewPostHandler)
 ], debug=True)

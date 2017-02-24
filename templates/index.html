@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-show last five posts
+<h1>WELCOME!</h1>
+
+
+{% for entry in recent %}
+<a href=/blog/{{entry.key().id()}}><h2>{{ entry.title }}</h2></a>
+<p>{{ entry.body }}</p>
+{% endfor %}
 
 {% endblock %}
