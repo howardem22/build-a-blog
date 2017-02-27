@@ -48,7 +48,7 @@ class Index(Handler):
 class NewPostHandler(Handler):
     def get (self):
         t = jinja_env.get_template("newpost.html")
-        content = t.render()
+        content = t.render(error = "")
         self.response.write(content)
 
     def post (self):
@@ -56,12 +56,15 @@ class NewPostHandler(Handler):
         user_body = self.request.get("blogtext")
 
         #needs both title and body, else regenerate form with error message
-        #if not user_name and user_body:
-        #    error = "You need to add some content"
-        entry = BlogPost(title = user_title, body = user_body)
-        entry.put()
-        id = entry.key().id()
-        self.redirect('/blog/%s' %id)
+        if user_title == "" or user_body == "":
+            t = jinja_env.get_template("newpost.html")
+            content = t.render(error = "You need to add some content")
+            self.response.write(content)
+        else:
+            entry = BlogPost(title = user_title, body = user_body)
+            entry.put()
+            id = entry.key().id()
+            self.redirect('/blog/%s' %id)
 
 class ViewPostHandler(webapp2.RequestHandler):
     def get(self, id):
